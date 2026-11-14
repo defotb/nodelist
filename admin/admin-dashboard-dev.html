@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OTB Node Directory — Administration</title>
+<link rel="stylesheet" href="/admin/admin-dashboard-dev.css">
+</head>
+<body>
+<header>
+  <h1>OutsideTheBox — Node Administration</h1>
+  <small>ETHO / Etica collector management</small>
+  <div class="admin-version">
+    Administrator v2.1.0-dev
+  </div>
+</header>
+<main>
+  <section id="login-panel" class="panel" hidden>
+    <h2>Administrator login</h2>
+    <form id="login-form">
+      <label for="username">Username</label>
+      <input id="username" autocomplete="username" required maxlength="128">
+      <label for="password">Password</label>
+      <input id="password" type="password"
+             autocomplete="current-password" required>
+      <p><button type="submit">Sign in</button></p>
+    </form>
+  </section>
+
+  <section id="dashboard" hidden>
+    <div class="panel toolbar">
+      <h2>Registered collectors</h2>
+      <span id="identity" class="muted"></span>
+      <button id="refresh" class="secondary" type="button">Refresh</button>
+      <button id="logout" class="secondary" type="button">Logout</button>
+    </div>
+    <div class="panel">
+      <div class="toolbar">
+        <label for="chain-filter">Blockchain</label>
+        <select id="chain-filter">
+          <option value="all">All chains</option>
+          <option value="etho">ETHO</option>
+          <option value="etica">Etica</option>
+        </select>
+        <span id="count" class="muted"></span>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Blockchain</th>
+              <th>Collector</th>
+              <th>Status</th>
+              <th>Last action</th>
+              <th>Updated</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="collector-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <section id="operation-inspection" class="panel" hidden>
+      <h2>Operation investigation</h2>
+      <p class="muted">
+        Read-only evidence. Inspection does not resolve an
+        operation or unlock a collector.
+      </p>
+
+      <dl id="operation-details"></dl>
+
+      <h3>Audit history</h3>
+      <ul id="operation-audit"></ul>
+
+      <p id="operation-inspection-error" role="alert"></p>
+
+      <button id="close-inspection"
+              class="secondary"
+              type="button">
+        Close investigation
+      </button>
+    </section>
+  </section>
+
+  <p id="error" role="alert"></p>
+  <p id="notice" aria-live="polite"></p>
+</main>
+
+<script src="/admin/admin-dashboard-dev.js" defer></script>
+</body>
+</html>

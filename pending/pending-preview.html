@@ -1,0 +1,1436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OutsideTheBox | Pending Node Explorer</title>
+<link rel="icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/favicon.png">
+<style>
+:root {
+  color-scheme: dark;
+  --bg:#10151c;
+  --panel:#1a222d;
+  --line:#303c4b;
+  --text:#e5edf5;
+  --muted:#98a8b8;
+  --accent:#42a5d8;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0; background:var(--bg);
+  color:var(--text);
+  font:14px Arial,sans-serif;
+}
+header {
+  background:var(--panel);
+  border-bottom:1px solid var(--line);
+  padding:20px;
+}
+h1 { margin:0 0 8px; font-size:24px; }
+.subtitle { color:var(--muted); }
+main { max-width:1400px; margin:auto; padding:20px; }
+.toolbar {
+  display:flex; flex-wrap:wrap;
+  gap:10px; align-items:center; margin-bottom:20px;
+}
+button, input {
+  background:var(--panel);
+  color:var(--text);
+  border:1px solid var(--line);
+  border-radius:6px;
+  padding:10px;
+}
+button { cursor:pointer; }
+button:hover { border-color:var(--accent); }
+button.active { background:#235678; border-color:var(--accent); }
+button:disabled { opacity:.4; cursor:default; }
+input[type=checkbox] { width:17px; height:17px; }
+input[type=text] { min-width:220px; flex:1; }
+.stats {
+  display:flex; flex-wrap:wrap; gap:12px;
+  margin-bottom:20px;
+}
+.stat {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:8px;
+  padding:16px; min-width:145px;
+}
+.stat strong { display:block; font-size:24px; margin-bottom:6px; }
+.stat span { color:var(--muted); font-size:12px; }
+.table-wrap {
+  overflow-x:auto;
+  border:1px solid var(--line);
+  border-radius:8px;
+}
+table { width:100%; border-collapse:collapse; }
+th,td {
+  padding:12px;
+  border-bottom:1px solid var(--line);
+  text-align:left;
+  white-space:nowrap;
+}
+th { background:var(--panel); color:var(--muted); }
+tr:hover td { background:#1a2835; }
+.small { color:var(--muted); font-size:12px; }
+.dot {
+  display:inline-block; width:10px; height:10px;
+  border-radius:50%; background:#888;
+  margin-right:6px;
+}
+.dot.green { background:#20bc72; }
+.dot.yellow { background:#e8b32d; }
+.dot.red { background:#dc5252; }
+.dot.gray { background:#888; }
+.actions { display:flex; flex-wrap:wrap; gap:8px; margin-top:15px; }
+#graphView { display:none; }
+#graph {
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:8px;
+  width:100%; height:500px;
+}
+#details {
+  white-space:pre-wrap; overflow-wrap:anywhere;
+  background:var(--panel);
+  padding:15px; border-radius:8px;
+  margin-top:12px;
+}
+.node-label { fill:#e5edf5; font-size:12px; }
+.edge { stroke:#547d9c; stroke-width:1.5; opacity:.65; }
+.node { cursor:pointer; }
+footer { margin-top:20px; color:var(--muted); font-size:12px; }
+
+/* ETHO Node Explorer v0.1.0 - theme support */
+header {
+    position: relative;
+    padding-right: 150px !important;
+}
+
+.version {
+    font-size: 0.55em;
+    font-weight: 400;
+    color: #95a9bf;
+    vertical-align: middle;
+    margin-left: 8px;
+}
+
+#themeToggle {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    cursor: pointer;
+    padding: 9px 14px;
+    border-radius: 6px;
+    background: #263547;
+    border: 1px solid #496078;
+    color: #edf4fa;
+    font-size: 13px;
+}
+
+#themeToggle:hover {
+    border-color: #70b8e6;
+}
+
+.version-footer {
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+/* Light theme overrides */
+html.light, html.light body {
+    background: #f4f7fb !important;
+    color: #1c2d40 !important;
+}
+
+html.light header,
+html.light .stat,
+html.light .table-wrap,
+html.light table,
+html.light #graph,
+html.light #details,
+html.light pre {
+    background: #ffffff !important;
+    color: #1c2d40 !important;
+    border-color: #cfdae6 !important;
+}
+
+html.light header {
+    border-bottom: 1px solid #d5e0ec;
+}
+
+html.light h1,
+html.light strong,
+html.light td,
+html.light th,
+html.light .subtitle,
+html.light .small,
+html.light footer {
+    color: #24374b !important;
+}
+
+html.light .version {
+    color: #607b96 !important;
+}
+
+html.light button,
+html.light input[type="text"],
+html.light select {
+    background: #edf3fa !important;
+    color: #24374b !important;
+    border-color: #b9cadb !important;
+}
+
+html.light button.active {
+    background: #2479ac !important;
+    color: #ffffff !important;
+}
+
+html.light button:hover,
+html.light select:hover {
+    border-color: #2479ac !important;
+}
+
+html.light th,
+html.light thead {
+    background: #e8eff7 !important;
+}
+
+html.light td,
+html.light th,
+html.light tr {
+    border-color: #d9e3ed !important;
+}
+
+html.light tbody tr:hover {
+    background: #eef5fc !important;
+}
+
+html.light .node-label {
+    fill: #25384c !important;
+}
+
+html.light .edge {
+    stroke: #7195b1 !important;
+}
+
+html.light #details,
+html.light pre {
+    background: #eaf1f8 !important;
+}
+
+html.light input[type="checkbox"] {
+    accent-color: #2479ac;
+}
+
+@media (max-width: 600px) {
+    header { padding-right: 8px !important; }
+    #themeToggle {
+        position: static;
+        margin-top: 12px;
+    }
+}
+
+
+/* Historical View */
+.history-panel {
+    background: #182636;
+    color: #e5edf5;
+    border: 1px solid #34465b;
+    border-radius: 8px;
+    padding: 25px;
+    margin-top: 15px;
+}
+.history-panel h2 {
+    margin-top: 0;
+}
+html.light .history-panel {
+    background: #fff;
+    color: #24374b;
+    border-color: #cfdae6;
+}
+
+
+/* OutsideTheBox responsive interface */
+
+header.otb-header, header {
+  padding: 18px 24px !important;
+}
+
+.otb-brand {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-right: 150px;
+}
+
+.otb-logo {
+  width: 64px;
+  height: 64px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: white;
+  padding: 4px;
+}
+
+.otb-brand-text h1 {
+  margin: 0 0 5px;
+}
+
+.otb-heading {
+  font-size: 17px;
+  color: var(--muted);
+}
+
+.otb-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.otb-controls select,
+#collectorSelect {
+  background: var(--panel);
+  color: var(--text);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 10px;
+  max-width: 100%;
+}
+
+#menuToggle {
+  display: none;
+  font-size: 22px;
+  min-width: 46px;
+  min-height: 44px;
+}
+
+#themeToggle {
+  z-index: 2;
+}
+
+@media (max-width: 760px) {
+  header {
+    padding: 14px !important;
+  }
+
+  .otb-brand {
+    padding-right: 0;
+    gap: 10px;
+  }
+
+  .otb-logo {
+    width: 48px;
+    height: 48px;
+  }
+
+  .otb-brand-text h1 {
+    font-size: 19px;
+  }
+
+  .otb-heading {
+    font-size: 13px;
+  }
+
+  .otb-controls {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+
+  .otb-controls select {
+    flex: 1;
+    min-width: 120px;
+  }
+
+  #menuToggle {
+    display: inline-block;
+  }
+
+  #themeToggle {
+    position: static;
+    margin-top: 12px;
+  }
+
+  #mainToolbar {
+    display: none;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  #mainToolbar.open {
+    display: flex;
+  }
+
+  #mainToolbar button,
+  #mainToolbar select,
+  #mainToolbar input {
+    width: 100%;
+    min-height: 44px;
+  }
+
+  main {
+    padding: 12px;
+  }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .stat {
+    min-width: 0;
+    padding: 12px;
+  }
+
+  .stat strong {
+    font-size: 21px;
+  }
+
+  .table-wrap {
+    border: none;
+    overflow: visible;
+  }
+
+  table, tbody, tr, td {
+    display: block;
+    width: 100%;
+  }
+
+  thead {
+    display: none;
+  }
+
+  tbody tr {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 12px;
+    padding: 10px;
+  }
+
+  tbody td {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    text-align: right;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    padding: 8px;
+  }
+
+  tbody td::before {
+    content: attr(data-label);
+    color: var(--muted);
+    font-weight: bold;
+    text-align: left;
+    flex: 0 0 95px;
+  }
+
+  tbody td:first-child::before {
+    content: "Select";
+  }
+
+  #graph {
+    height: 400px;
+    touch-action: pan-y;
+  }
+
+  .actions button {
+    flex: 1 1 100%;
+    min-height: 44px;
+  }
+}
+
+html.light .otb-heading {
+  color: #50677e;
+}
+
+
+/* otb-mobile-v021: mobile card and navigation improvements */
+
+@media (max-width: 760px) {
+
+  #mainToolbar #themeToggle {
+    display: block;
+    position: static;
+    width: 100%;
+    min-height: 44px;
+    margin: 0;
+    text-align: center;
+  }
+
+  tbody tr {
+    display: flex;
+    flex-direction: column;
+  }
+
+  tbody td:nth-child(2),
+  tbody td:nth-child(3),
+  tbody td:nth-child(7) {
+    display: none;
+  }
+
+  tbody td.mobile-node-heading {
+    display: flex;
+    order: -2;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    text-align: left;
+    padding: 9px 8px 13px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .mobile-node-heading::before {
+    display: none;
+  }
+
+  .mobile-node-name {
+    font-size: 15px;
+    font-weight: 700;
+    overflow-wrap: anywhere;
+  }
+
+  .mobile-node-status {
+    font-size: 12px;
+    white-space: nowrap;
+    color: var(--muted);
+  }
+
+  tbody td:first-child {
+    order: -1;
+  }
+
+  tbody td.mobile-copy-row {
+    display: block;
+    order: 20;
+    padding-top: 13px;
+    text-align: center;
+  }
+
+  .mobile-copy-row::before {
+    display: none;
+  }
+
+  .mobile-copy-button {
+    width: 100%;
+    min-height: 44px;
+    background: #235678;
+    border-color: var(--accent);
+    color: white;
+    font-size: 13px;
+  }
+
+  .mobile-copy-button:disabled {
+    opacity: 0.4;
+  }
+}
+
+/* Hidden from desktop and tablet table layouts above 760px */
+@media (min-width: 761px) {
+  td.mobile-node-heading,
+  td.mobile-copy-row {
+    display: none;
+  }
+}
+
+
+
+/* Pending network visualization */
+#graph {
+  min-height: 480px;
+  background:
+    radial-gradient(
+      ellipse at center,
+      rgba(41,145,166,.12),
+      transparent 65%
+    ),
+    var(--panel);
+}
+
+#graph .edge {
+  stroke: #39a9c2;
+  stroke-width: 1.8;
+  stroke-dasharray: 7 12;
+  opacity: .65;
+  animation: pending-flow 7s linear infinite;
+}
+
+#graph .node circle {
+  transition: filter .2s ease, stroke-width .2s ease;
+}
+
+#graph .node:hover circle {
+  filter: brightness(1.35);
+  stroke-width: 3;
+}
+
+#graph .node-label {
+  fill: var(--text);
+  font-size: 12px;
+}
+
+#graph .collector-halo {
+  fill: none;
+  stroke: #39c5b6;
+  stroke-width: 2;
+  opacity: .5;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: collector-pulse 3s ease-in-out infinite;
+}
+
+@keyframes pending-flow {
+  to { stroke-dashoffset: -76; }
+}
+
+@keyframes collector-pulse {
+  0%, 100% { opacity: .25; transform: scale(.92); }
+  50% { opacity: .8; transform: scale(1.15); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #graph .edge,
+  #graph .collector-halo {
+    animation: none;
+  }
+}
+
+/* OTB Pending Collector Explorer */
+.pending-banner {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:18px;
+  margin:0 0 18px;
+  border:1px solid #b88a32;
+  border-radius:10px;
+  background:rgba(184,138,50,.09);
+}
+
+.pending-description {
+  color:var(--muted);
+  font-size:13px;
+  margin-top:5px;
+}
+
+.pending-badge {
+  color:#e8b85a;
+  border:1px solid #b88a32;
+  border-radius:20px;
+  padding:6px 12px;
+  font-size:12px;
+  font-weight:bold;
+}
+
+.pending-empty {
+  color:var(--muted);
+  text-align:center;
+  padding:36px 16px;
+  font-size:15px;
+}
+
+</style>
+</head>
+<body>
+<header>
+<div class="otb-brand">
+  <img src="/otb-logo-400x400.png" alt="OutsideTheBox logo"
+       class="otb-logo">
+  <div class="otb-brand-text">
+    <h1>OutsideTheBox <span class="version">v0.2.2</span></h1>
+    <div class="otb-heading">Pending Node Explorer</div>
+  </div>
+</div>
+<div class="otb-controls">
+  <label for="chainSelect">Blockchain</label>
+  <select id="chainSelect" aria-label="Select blockchain">
+    <option value="etho">ETHO Protocol</option>
+    <option value="etica">Etica</option>
+  </select>
+  <button id="menuToggle" type="button"
+          aria-label="Open navigation menu"
+          aria-controls="mainToolbar"
+          aria-expanded="false">☰</button>
+</div>
+<button id="themeToggle" type="button" aria-label="Switch to light mode">
+  ☀ Light mode
+</button>
+<div class="subtitle">
+Provisional collectors awaiting administrator approval
+</div>
+</header>
+
+<main>
+
+<section id="pendingBanner" class="pending-banner">
+  <div>
+    <strong>Pending Collector Network</strong>
+    <div class="pending-description">
+      Live peer observations from collectors awaiting
+      administrator approval.
+    </div>
+  </div>
+  <span class="pending-badge">Awaiting Approval</span>
+</section>
+
+
+<div class="toolbar" id="mainToolbar">
+  <button id="listBtn">List View</button>
+  <button id="graphBtn" class="active">Network Graph</button>
+  <button id="historyBtn" style="display:none;">Historical View</button>
+  <select id="collectorSelect" title="Choose collector"
+    aria-label="Choose collector">
+    <option value="all">All collectors</option>
+  </select>
+  <input type="text" id="search" placeholder="Search nodes, IPs, enodes...">
+  <button id="refreshBtn">Refresh</button>
+</div>
+
+<div class="stats">
+  <div class="stat"><strong id="total">—</strong><span>Discovered nodes</span></div>
+  <div class="stat"><strong id="peers">—</strong><span>Connected peers</span></div>
+  <div class="stat"><strong id="collector">—</strong><span>Collector</span></div>
+</div>
+
+<section id="listView" style="display:none;">
+<div class="table-wrap">
+<table>
+<thead>
+<tr>
+<th><input type="checkbox" id="selectAll" title="Select visible nodes"></th>
+<th>Status</th>
+<th>Node</th>
+<th>Address</th>
+<th>Block height</th>
+<th>Geth version</th>
+<th>Enode</th>
+</tr>
+</thead>
+<tbody id="nodeRows"></tbody>
+</table>
+</div>
+
+<div class="actions">
+<button id="copyEnodes">Copy selected enodes</button>
+<button id="clearSelection">Clear selection</button>
+<span id="selectionCount" class="small"></span>
+</div>
+</section>
+
+<section id="graphView" style="display:block;">
+<p class="small">
+Click a node to inspect its details. Lines represent observed P2P connections.
+</p>
+<svg id="graph" viewBox="0 0 900 500" aria-label="Pending collector network graph"></svg>
+<div id="pendingEmpty" class="pending-empty">
+  No pending collector observations available.
+</div>
+<pre id="details">Select a node to view details.</pre>
+</section>
+
+
+<section id="historyView" style="display:none;">
+  <div class="history-panel">
+    <h2>Historical Nodes</h2>
+    <p>Nodes not observed for six hours or longer will appear here.</p>
+    <p class="small">
+      No historical records are available yet.
+      Historical tracking will begin when the central SQLite
+      registry is enabled.
+    </p>
+  </div>
+</section>
+
+<footer>
+<div class="version-footer">OutsideTheBox Pending Node Explorer v0.2.2</div>
+<span id="updated">Waiting for collector...</span>
+<div style="margin-top:6px">
+Gray = synchronization not yet verified. Connection does not prove chain agreement.
+</div>
+</footer>
+</main>
+
+<script>
+const menuToggle = document.getElementById("menuToggle");
+const mainToolbar = document.getElementById("mainToolbar");
+
+menuToggle.addEventListener("click", () => {
+  const open = mainToolbar.classList.toggle("open");
+  menuToggle.setAttribute("aria-expanded", String(open));
+  menuToggle.setAttribute(
+    "aria-label",
+    open ? "Close navigation menu" : "Open navigation menu"
+  );
+});
+
+const $ = id => document.getElementById(id);
+let data = null;
+let selected = new Set();
+let view = "graph";
+let selectedChain = "etho";
+let requestSerial = 0;
+
+let chains = {
+  etho: {
+    name: "ETHO Protocol",
+    collectors: [
+      ["dash-rpc", "dash-rpc"],
+      ["etho-exp", "etho-exp (Baltimore)"],
+      ["catastrophic", "catastrophic"],
+      ["rpc4.ethoprotocol.com", "rpc4.ethoprotocol.com"]
+    ]
+  },
+  etica: {
+    name: "Etica",
+    collectors: [
+      ["rpc2.etica-stats.org", "rpc2.etica-stats.org"]
+    ]
+  }
+};
+
+let pendingCollectors = [];
+
+function populateCollectors() {
+  const select = $("collectorSelect");
+  const previous = select.value;
+
+  select.replaceChildren();
+  select.add(new Option("All pending collectors", "all"));
+
+  for(const id of pendingCollectors) {
+    select.add(new Option(id, id));
+  }
+
+  select.value = pendingCollectors.includes(previous)
+    ? previous : "all";
+}
+
+function changeChain(chain, updateUrl = true) {
+  if(!chains[chain]) chain = Object.keys(chains)[0];
+
+  selectedChain = chain;
+  $("chainSelect").value = chain;
+
+  selected.clear();
+  data = null;
+  pendingCollectors = [];
+  populateCollectors();
+
+  $("search").value = "";
+  $("nodeRows").replaceChildren();
+  $("graph").replaceChildren();
+  $("details").textContent = "Select a node to view details.";
+
+  for(const id of ["total", "peers", "collector"])
+    $(id).textContent = "—";
+
+  updateSelection();
+
+  document.title =
+    chains[chain].name + " | OutsideTheBox Pending Explorer";
+
+  if(updateUrl) {
+    const url = new URL(window.location.href);
+    url.searchParams.set("chain", chain);
+    window.history.replaceState({}, "", url);
+  }
+
+  refresh();
+}
+
+async function initChain() {
+  try {
+    const response = await fetch(
+      "feeds/chains.json?t=" + Date.now(),
+      {cache: "no-store"}
+    );
+
+    if(!response.ok)
+      throw new Error("HTTP " + response.status);
+
+    const config = await response.json();
+    const discovered = {};
+
+    for(const [id, entry] of Object.entries(config.chains || {})) {
+      if(!/^[a-zA-Z0-9._-]+$/.test(id))
+        continue;
+
+      if(typeof entry.name !== "string" ||
+         !Array.isArray(entry.collectors))
+        continue;
+
+      discovered[id] = {
+        name: entry.name,
+        collectors: entry.collectors
+          .filter(c => typeof c === "string" &&
+            /^[a-zA-Z0-9._-]+$/.test(c))
+          .map(c => [c, c])
+      };
+    }
+
+    if(Object.keys(discovered).length === 0)
+      throw new Error("No valid chains");
+
+    chains = discovered;
+    console.log("OutsideTheBox: loaded public chain configuration");
+
+  } catch(error) {
+    console.warn(
+      "OutsideTheBox: using fallback chain configuration",
+      error
+    );
+  }
+
+  const chainSelect = $("chainSelect");
+  chainSelect.replaceChildren();
+
+  for(const [id, entry] of Object.entries(chains))
+    chainSelect.add(new Option(entry.name, id));
+
+  const params = new URLSearchParams(window.location.search);
+  changeChain(params.get("chain") || "etho", true);
+}
+
+$("chainSelect").onchange = e => {
+  changeChain(e.target.value);
+};
+
+window.addEventListener("popstate", () => {
+  const params = new URLSearchParams(window.location.search);
+  changeChain(params.get("chain") || "etho", false);
+});
+
+const knownNames = {
+  "62.72.177.114:29999":"dash-rpc",
+  "62.72.177.111:33005":"rpc4",
+  "62.72.177.114:30305":"node-dashboard",
+  "144.91.86.189:30306":"catastrophic",
+  "62.72.177.111:31100":"rpc"
+};
+
+function address(n) {
+  const match = (n.enode || "").match(/@([^?]+)/);
+  return match ? match[1] : "Unknown";
+}
+
+function name(n) {
+  // Registered collectors explicitly choose to be publicly identified.
+  if(n.collector === true) {
+    return n.name || "Collector";
+  }
+
+  // All other nodes remain pseudonymous.
+  // Use the Geth node ID rather than IP address or client identity.
+  return selectedChain.toUpperCase() + "-" + (n.id || "unknown").slice(0,8);
+}
+
+function version(n) {
+  const m = (n.client || "").match(/v[0-9]+\.[0-9]+\.[0-9]+[^/]*/);
+  return m ? m[0] : "Unknown";
+}
+
+function status(n) {
+  if(n.sync_status === "synced") return ["green","Synced"];
+  if(n.sync_status === "syncing") return ["yellow","Syncing"];
+  if(n.sync_status === "forked") return ["red","Forked"];
+  if(n.sync_status === "offline")
+    return ["red","Offline"];
+  if(n.connected === false)
+    return ["gray","Not recently observed"];
+  return ["gray","Unverified"];
+}
+
+function visibleNodes() {
+  if(!data) return [];
+  const q = $("search").value.trim().toLowerCase();
+  return data.nodes.filter(n =>
+    [name(n), address(n), n.enode, n.client]
+      .join(" ").toLowerCase().includes(q)
+  );
+}
+
+function renderList() {
+  const body = $("nodeRows");
+  body.replaceChildren();
+
+  for(const n of visibleNodes()) {
+    const tr = document.createElement("tr");
+    const st = status(n);
+
+    const checkCell = tr.insertCell();
+    const check = document.createElement("input");
+    check.type = "checkbox";
+    check.checked = selected.has(n.id);
+    check.onchange = () => {
+      if(check.checked) selected.add(n.id);
+      else selected.delete(n.id);
+      updateSelection();
+    };
+    checkCell.appendChild(check);
+
+    const values = [
+      st[1], name(n), address(n),
+      n.block_height ?? "—",
+      version(n), (n.enode || "").slice(0,25) + "..."
+    ];
+
+    values.forEach((value,i) => {
+      const td = tr.insertCell();
+      td.dataset.label = [
+        "Status", "Node", "Address",
+        "Block height", "Geth version", "Enode"
+      ][i];
+      td.textContent = value;
+      if(i===0) {
+        const dot = document.createElement("span");
+        dot.className = "dot " + st[0];
+        td.prepend(dot);
+      }
+      if(i===5) td.title = n.enode || "";
+    });
+    body.appendChild(tr);
+  }
+  updateSelection();
+}
+
+function updateSelection() {
+  const visible = visibleNodes();
+  $("selectionCount").textContent = selected.size + " selected";
+  $("selectAll").checked =
+    visible.length > 0 && visible.every(n=>selected.has(n.id));
+  $("copyEnodes").disabled = selected.size===0;
+}
+
+
+function renderGraph() {
+  const svg = $("graph");
+  svg.replaceChildren();
+
+  const hasNodes = !!(
+    data &&
+    Array.isArray(data.nodes) &&
+    data.nodes.length
+  );
+
+  $("pendingEmpty").style.display =
+    hasNodes ? "none" : "block";
+
+  if(!hasNodes) return;
+
+  const nodes = data.nodes;
+  const positions = new Map();
+
+  // Spread collectors and peers around the graph.
+  const collectors = nodes.filter(n => n.collector);
+  const peers = nodes.filter(n => !n.collector);
+
+  collectors.forEach((n,i) => {
+    const angle = 2*Math.PI*i/Math.max(1,collectors.length);
+    positions.set(n.id, {
+      x: collectors.length === 1
+        ? 450 : 450+110*Math.cos(angle),
+      y: collectors.length === 1
+        ? 250 : 250+85*Math.sin(angle)
+    });
+  });
+
+  peers.forEach((n,i) => {
+    const angle = 2*Math.PI*i/Math.max(1,peers.length)-Math.PI/2;
+    const ring = 185 + 105 * (i % 3) / 2;
+    positions.set(n.id, {
+      x:450+ring*Math.cos(angle)*1.3,
+      y:250+ring*Math.sin(angle)*.78
+    });
+  });
+
+  function element(tag,attrs) {
+    const el = document.createElementNS(
+      "http://www.w3.org/2000/svg",tag
+    );
+    for(const [key,value] of Object.entries(attrs))
+      el.setAttribute(key,value);
+    return el;
+  }
+
+  // Combined view: actual collector-to-peer observations.
+  // Individual view: original single-collector connections.
+  const edges = Array.isArray(data.edges)
+    ? data.edges
+    : collectors.flatMap(c =>
+        peers.filter(n => n.connected === true)
+          .map(n => ({from:c.id,to:n.id}))
+      );
+
+  for(const edge of edges) {
+    const a=positions.get(edge.from);
+    const b=positions.get(edge.to);
+    if(!a || !b) continue;
+
+    svg.appendChild(element("line",{
+      x1:a.x,y1:a.y,x2:b.x,y2:b.y,class:"edge"
+    }));
+  }
+
+  nodes.forEach(n => {
+    const p=positions.get(n.id);
+    if(!p) return;
+
+    const g=element("g",{class:"node"});
+
+    if(n.collector) {
+      g.appendChild(element("circle",{
+        cx:p.x,cy:p.y,r:37,
+        class:"collector-halo"
+      }));
+    }
+
+    const dot=element("circle",{
+      cx:p.x,cy:p.y,r:n.collector?25:14,
+      fill:n.collector?"#27b8a5":"#347eaa",
+      stroke:"#a8d8ef","stroke-width":"1.5"
+    });
+    const label=element("text",{
+      x:p.x,y:p.y+39,
+      "text-anchor":"middle",class:"node-label"
+    });
+
+    label.textContent=name(n);
+    g.append(dot,label);
+
+    g.onclick=()=>{
+      $("details").textContent=JSON.stringify({
+        name:name(n),
+        address:address(n),
+        status:status(n)[1],
+        enode:n.enode,
+        client:n.client,
+        protocols:n.protocols,
+        observed_by:n.sources || [data.collector]
+      },null,2);
+    };
+
+    svg.appendChild(g);
+  });
+}
+
+function render() {
+  if(!data) return;
+  $("total").textContent=data.total_nodes;
+  $("peers").textContent=data.connected_peers;
+  $("collector").textContent =
+    Array.isArray(data.sources)
+      ? data.sources.length
+      : data.collector;
+  $("updated").textContent="Last collection: "+data.timestamp;
+  renderList();
+  renderGraph();
+}
+
+async function refresh() {
+  const serial = ++requestSerial;
+  const chain = selectedChain;
+  const source = $("collectorSelect").value;
+
+  try {
+    const url = "/pending-feeds/" + encodeURIComponent(chain) + "/" +
+      encodeURIComponent(source) + ".json?t=" + Date.now();
+
+    const response = await fetch(url, {cache:"no-store"});
+
+    if(!response.ok)
+      throw Error("HTTP " + response.status);
+
+    const incoming = await response.json();
+
+    // Ignore responses from previous blockchain selections.
+    if(serial !== requestSerial || chain !== selectedChain)
+      return;
+
+    if(incoming.chain !== chain)
+      throw Error("Feed blockchain mismatch");
+
+    data = incoming;
+
+    if(source === "all") {
+      pendingCollectors = Array.isArray(incoming.sources)
+        ? [...new Set(incoming.sources)].filter(id =>
+            typeof id === "string" &&
+            /^[A-Za-z0-9_.-]+$/.test(id) &&
+            id !== "." && id !== ".." &&
+            id !== "all"
+          )
+        : [];
+
+      populateCollectors();
+    }
+
+    render();
+
+    if(!data.sources?.length && source === "all") {
+      $("updated").textContent =
+        chains[chain].name + ": awaiting collector data";
+    }
+
+  } catch(err) {
+    if(serial !== requestSerial || chain !== selectedChain)
+      return;
+
+    data = null;
+    $("nodeRows").replaceChildren();
+    $("graph").replaceChildren();
+    $("pendingEmpty").style.display = "block";
+
+    for(const id of ["total", "peers", "collector"])
+      $(id).textContent = "—";
+
+    selected.clear();
+    updateSelection();
+
+    $("updated").textContent =
+      "Collector data unavailable: " + err.message;
+  }
+}
+
+$("selectAll").onchange=e=>{
+  visibleNodes().forEach(n=>{
+    if(e.target.checked) selected.add(n.id);
+    else selected.delete(n.id);
+  });
+  renderList();
+};
+
+$("collectorSelect").onchange=()=>{
+  selected.clear();
+  refresh();
+};
+
+$("search").oninput=renderList;
+$("refreshBtn").onclick=refresh;
+
+$("listBtn").onclick=()=>{
+  view="list";
+  $("listView").style.display="block";
+  $("graphView").style.display="none";
+  $("listBtn").classList.add("active");
+  $("graphBtn").classList.remove("active");
+};
+
+$("graphBtn").onclick=()=>{
+  view="graph";
+  $("listView").style.display="none";
+  $("graphView").style.display="block";
+  $("graphBtn").classList.add("active");
+  $("listBtn").classList.remove("active");
+};
+
+function chosen() {
+  return (data?.nodes || []).filter(n=>selected.has(n.id));
+}
+
+async function copyText(value) {
+  try {
+    if (navigator.clipboard && window.isSecureContext) {
+      await navigator.clipboard.writeText(value);
+    } else {
+      const textarea = document.createElement("textarea");
+      textarea.value = value;
+      textarea.style.position = "fixed";
+      textarea.style.left = "-9999px";
+      document.body.appendChild(textarea);
+      textarea.focus();
+      textarea.select();
+
+      const success = document.execCommand("copy");
+      textarea.remove();
+
+      if (!success) throw new Error("Browser refused clipboard access");
+    }
+    alert("Copied " + value.split("\n").length + " lines to clipboard.");
+  } catch(err) {
+    alert("Clipboard unavailable: " + err.message);
+  }
+}
+
+$("copyEnodes").onclick=()=>copyText(
+  chosen().filter(n=>n.enode).map(n=>n.enode).join("\n")
+);
+
+$("clearSelection").onclick=()=>{
+  selected.clear();
+  renderList();
+};
+
+initChain();
+setInterval(refresh,30000);
+
+// Persistent light/dark theme
+const themeButton = document.getElementById("themeToggle");
+
+function applyTheme(theme) {
+    const light = theme === "light";
+    document.documentElement.classList.toggle("light", light);
+    themeButton.textContent = light ? "☾ Dark mode" : "☀ Light mode";
+    themeButton.setAttribute(
+        "aria-label",
+        light ? "Switch to dark mode" : "Switch to light mode"
+    );
+}
+
+let savedTheme = "dark";
+try {
+    savedTheme = localStorage.getItem("otb-node-theme") || "dark";
+} catch (e) {}
+
+applyTheme(savedTheme);
+
+themeButton.addEventListener("click", () => {
+    const next = document.documentElement.classList.contains("light")
+        ? "dark" : "light";
+    applyTheme(next);
+    try {
+        localStorage.setItem("otb-node-theme", next);
+    } catch (e) {}
+});
+
+</script>
+
+<script>
+// Historical tab navigation
+(function() {
+    const historyBtn = document.getElementById("historyBtn");
+    const historyView = document.getElementById("historyView");
+    const listView = document.getElementById("listView");
+    const graphView = document.getElementById("graphView");
+    const listBtn = document.getElementById("listBtn");
+    const graphBtn = document.getElementById("graphBtn");
+
+    historyBtn.addEventListener("click", () => {
+        listView.style.display = "none";
+        graphView.style.display = "none";
+        historyView.style.display = "block";
+
+        listBtn.classList.remove("active");
+        graphBtn.classList.remove("active");
+        historyBtn.classList.add("active");
+    });
+
+    listBtn.addEventListener("click", () => {
+        historyView.style.display = "none";
+        historyBtn.classList.remove("active");
+    });
+
+    graphBtn.addEventListener("click", () => {
+        historyView.style.display = "none";
+        historyBtn.classList.remove("active");
+    });
+})();
+</script>
+
+
+<script>
+// otb-mobile-v021: responsive controls and node cards
+(function() {
+  const menu = document.getElementById("mainToolbar");
+  const toggle = document.getElementById("menuToggle");
+  const theme = document.getElementById("themeToggle");
+  const header = document.querySelector("header");
+  const subtitle = header.querySelector(".subtitle");
+  const mobile = window.matchMedia("(max-width: 760px)");
+
+  function closeMenu() {
+    menu.classList.remove("open");
+    toggle.setAttribute("aria-expanded", "false");
+    toggle.setAttribute("aria-label", "Open navigation menu");
+  }
+
+  function arrangeTheme() {
+    if(mobile.matches) {
+      if(theme.parentElement !== menu)
+        menu.appendChild(theme);
+    } else {
+      if(theme.parentElement !== header)
+        header.insertBefore(theme, subtitle);
+
+      closeMenu();
+    }
+  }
+
+  arrangeTheme();
+  window.addEventListener("resize", arrangeTheme);
+
+  // Close after navigating between views.
+  for(const id of ["listBtn", "graphBtn", "historyBtn"]) {
+    document.getElementById(id).addEventListener("click", closeMenu);
+  }
+
+  // Close when tapping outside the navigation.
+  document.addEventListener("click", function(event) {
+    if(!mobile.matches || !menu.classList.contains("open"))
+      return;
+
+    if(menu.contains(event.target) || toggle.contains(event.target))
+      return;
+
+    closeMenu();
+  });
+
+  // Escape closes the navigation.
+  document.addEventListener("keydown", function(event) {
+    if(event.key === "Escape")
+      closeMenu();
+  });
+
+  // Add responsive headings to pending peer cards.
+  const tbody = document.getElementById("nodeRows");
+
+  function enhanceCards() {
+    const rows = Array.from(tbody.rows);
+    const nodes = visibleNodes();
+
+    rows.forEach((row, index) => {
+      if(row.querySelector(".mobile-node-heading"))
+        return;
+
+      const node = nodes[index];
+      if(!node) return;
+
+      const heading = row.insertCell();
+      heading.className = "mobile-node-heading";
+
+      const title = document.createElement("span");
+      title.className = "mobile-node-name";
+      title.textContent = name(node);
+
+      const state = document.createElement("span");
+      state.className = "mobile-node-status";
+
+      const info = status(node);
+
+      const dot = document.createElement("span");
+      dot.className = "dot " + info[0];
+
+      state.appendChild(dot);
+      state.appendChild(document.createTextNode(info[1]));
+
+      heading.appendChild(title);
+      heading.appendChild(state);
+
+    });
+  }
+
+  const observer = new MutationObserver(enhanceCards);
+  observer.observe(tbody, {childList:true});
+
+  enhanceCards();
+})();
+</script>
+
+</body>
+</html>

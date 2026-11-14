@@ -1,0 +1,96 @@
+:root {
+  color-scheme: dark light;
+  font-family: system-ui, sans-serif;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: #101722;
+  color: #e8edf5;
+}
+header {
+  background: #182335;
+  border-bottom: 1px solid #354358;
+  padding: 18px 24px;
+}
+h1 { font-size: 1.35rem; margin: 0; }
+h2 { font-size: 1.1rem; }
+small, .muted { color: #aebdd0; }
+main { max-width: 1150px; margin: auto; padding: 24px; }
+.panel {
+  background: #192537;
+  border: 1px solid #354358;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+input, button, select {
+  font: inherit;
+  border-radius: 7px;
+  padding: 10px 12px;
+}
+input, select {
+  color: inherit;
+  background: #101722;
+  border: 1px solid #58677c;
+}
+button {
+  background: #3468bd;
+  border: 1px solid #5684d1;
+  color: white;
+  cursor: pointer;
+}
+button:disabled { opacity: .55; cursor: default; }
+button.secondary { background: #344359; }
+label { display: block; margin: 12px 0 5px; }
+.toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.toolbar h2 { margin-right: auto; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  padding: 12px;
+  border-bottom: 1px solid #354358;
+  text-align: left;
+  font-size: .9rem;
+}
+th { color: #b7c7dd; }
+.status {
+  display: inline-block;
+  padding: 4px 9px;
+  border: 1px solid currentColor;
+  border-radius: 20px;
+  font-size: .8rem;
+}
+.enabled { color: #67d9a0; }
+.pending { color: #f0c879; }
+.suspended { color: #f3a56e; }
+.revoked { color: #b9a3ae; }
+#error { color: #ffb2b2; min-height: 1.4em; }
+#notice { min-height: 1.4em; }
+[hidden] { display: none !important; }
+@media (prefers-color-scheme: light) {
+  body { background: #f1f4f9; color: #192537; }
+  header, .panel { background: white; border-color: #d3dce7; }
+  input, select {
+    background: white;
+    color: #192537;
+    border-color: #9ba9ba;
+  }
+  th, td { border-color: #d3dce7; }
+  th, small, .muted { color: #596b7e; }
+  .enabled { color: #176b44; }
+  .pending { color: #876100; }
+  .suspended { color: #a14a11; }
+  .revoked { color: #765d68; }
+  #error { color: #ac2525; }
+}
+@media (max-width: 600px) {
+  main { padding: 12px; }
+  header { padding: 16px; }
+  .panel { padding: 14px; }
+}

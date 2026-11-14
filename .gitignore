@@ -1,0 +1,100 @@
+# OTB Node Directory
+# Deny by default. Explicitly allow reviewed files.
+
+*
+
+# Repository documentation
+!.gitignore
+!README.md
+!SECURITY.md
+!CONTRIBUTING.md
+!.gitattributes
+
+# Documentation directory
+!docs/
+!docs/*.md
+
+# Source directories and individual files will be
+# allowlisted after the project inventory is reviewed.
+
+# Never track live credentials or registration data.
+private/
+admin-private/
+admin-preview-private/
+**/tokens.json
+**/invitations.json
+**/accounts.json
+**/collector-status.json
+**/enroll-transaction.json
+**/uninstall-receipts.json
+
+# Never track runtime data or recovery materials.
+admin-live-test/
+otb-bytecode-recovery/
+__pycache__/
+*.pyc
+*.log
+*.jsonl
+*.bak
+*.backup
+*.pre-*
+*.tar
+*.tar.gz
+*.zip
+
+# Local configuration
+.env
+.env.*
+*.key
+*.pem
+*.sqlite
+*.db
+
+# BEGIN REVIEWED SOURCE ALLOWLIST
+# All other project files remain ignored.
+!web/
+!web/index.html
+!web/chains.json
+!web/otb-logo-400x400.png
+!web/favicon.ico
+!web/favicon.png
+!web/downloads/
+!web/downloads/otb-collect.py
+!web/downloads/otb-install.py
+!web/downloads/otb-push.py
+!web/downloads/otb-run.py
+!server/
+!server/otb-discover-geth.py
+!server/otb-enroll-admin.py
+!server/otb-enrollment-identity.py
+!server/otb_registry.py
+!server/otb_transactions.py
+!server/publish_chains.py
+!server/otb-enrollment-dev.py
+!server/otb_registry_dev.py
+!server/otb_consistency_dev.py
+!server/otb_transactions_dev.py
+!admin/
+!admin/admin-dashboard-dev.html
+!admin/admin-dashboard-dev.css
+!admin/admin-dashboard-dev.js
+!admin/otb-admin-preview.py
+!admin/otb_admin_accounts_dev.py
+!admin/otb_admin_adapter_dev.py
+!admin/otb_admin_api_dev.py
+!admin/otb_admin_assessment_dev.py
+!admin/otb_admin_audit_dev.py
+!admin/otb_admin_auth_dev.py
+!admin/otb_admin_coordinator_dev.py
+!admin/otb_admin_csrf_dev.py
+!admin/otb_admin_directory_dev.py
+!admin/otb_admin_dispatch_dev.py
+!admin/otb_admin_http_mapper_dev.py
+!admin/otb_admin_limit_dev.py
+!admin/otb_admin_operations_dev.py
+!admin/otb_admin_reconcile_dev.py
+!admin/otb_admin_snapshot_dev.py
+!pending/
+!pending/pending-preview.html
+!pending/publish-pending.py
+# END REVIEWED SOURCE ALLOWLIST

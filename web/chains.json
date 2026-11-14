@@ -1,0 +1,19 @@
+{
+  "chains": {
+    "etho": {
+      "name": "ETHO Protocol",
+      "collectors": [
+        "dash-rpc",
+        "etho-exp",
+        "catastrophic",
+        "rpc4.ethoprotocol.com"
+      ]
+    },
+    "etica": {
+      "name": "Etica",
+      "collectors": [
+        "rpc2.etica-stats.org"
+      ]
+    }
+  }
+}
