@@ -538,7 +538,117 @@ html.light .otb-heading {
   }
 }
 
+
+/* Unified OTB navigation — development */
+.otb-page-navigation {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.otb-page-navigation a {
+  display: inline-block;
+  padding: 10px 12px;
+  color: var(--text);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.otb-page-navigation a:hover,
+.otb-page-navigation a:focus-visible {
+  background: var(--accent);
+  color: white;
+}
+
+@media (max-width: 760px) {
+  .otb-page-navigation {
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .otb-page-navigation a {
+    width: 100%;
+    min-height: 44px;
+  }
+}
 </style>
+
+<style id="otb-collector-header-style">
+.otb-collector-links {
+  position: absolute;
+  top: 12px;
+  right: 155px;
+  display: flex;
+  gap: 9px;
+  align-items: stretch;
+  z-index: 5;
+}
+
+.otb-collector-link {
+  box-sizing: border-box;
+  width: 185px;
+  min-height: 52px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid #496078;
+  border-radius: 6px;
+  background: #263547;
+  color: #edf4fa;
+  text-align: center;
+  text-decoration: none;
+  font-size: 12px;
+  line-height: 1.25;
+}
+
+.otb-collector-link strong {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.otb-collector-link small {
+  font-size: 10px;
+  opacity: .85;
+}
+
+.otb-collector-link:hover {
+  border-color: #70b8e6;
+  background: #30445a;
+  color: white;
+}
+
+html.light .otb-collector-link {
+  background: #f2f6fb;
+  color: #1c2d40;
+  border-color: #b5c6d7;
+}
+
+header .otb-controls .otb-collector-links {
+  position: static;
+}
+
+@media (max-width: 1150px) {
+  .otb-collector-links {
+    position: static;
+    margin: 12px 0;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 600px) {
+  .otb-collector-link {
+    width: 165px;
+  }
+}
+</style>
+
 </head>
 <body>
 <header>
@@ -546,7 +656,7 @@ html.light .otb-heading {
   <img src="/otb-logo-400x400.png" alt="OutsideTheBox logo"
        class="otb-logo">
   <div class="otb-brand-text">
-    <h1>OutsideTheBox <span class="version">v0.2.2</span></h1>
+    <h1>OutsideTheBox <span class="version">v3.0.0</span></h1>
     <div class="otb-heading">Multichain Node Explorer</div>
   </div>
 </div>
@@ -561,6 +671,23 @@ html.light .otb-heading {
           aria-controls="mainToolbar"
           aria-expanded="false">☰</button>
 </div>
+<div class="otb-collector-links" aria-label="Collector App downloads">
+  <a class="otb-collector-link"
+     href="/downloads/otb-install.py"
+     download="otb-install.py"
+     title="Download OTB Collector installer">
+    <strong>↓ Download Collector</strong>
+    <small>v1.0.4 · ETHO / Etica</small>
+  </a>
+  <a class="otb-collector-link"
+     href="https://github.com/defotb/collector-app/releases"
+     target="_blank"
+     rel="noopener noreferrer"
+     title="OTB Collector App GitHub releases">
+    <strong>GitHub Releases</strong>
+    <small>Collector App</small>
+  </a>
+</div>
 <button id="themeToggle" type="button" aria-label="Switch to light mode">
   ☀ Light mode
 </button>
@@ -571,6 +698,12 @@ Read-only blockchain peer discovery and network monitoring
 
 <main>
 <div class="toolbar" id="mainToolbar">
+  <nav class="otb-page-navigation"
+       aria-label="OTB directory navigation">
+    <a href="/pending/pending-preview.html">
+      Pending Explorer
+    </a>
+  </nav>
   <button id="listBtn" class="active">List View</button>
   <button id="graphBtn">Graph View</button>
   <button id="historyBtn" style="display:none;">Historical View</button>
@@ -585,7 +718,36 @@ Read-only blockchain peer discovery and network monitoring
 <div class="stats">
   <div class="stat"><strong id="total">—</strong><span>Discovered nodes</span></div>
   <div class="stat"><strong id="peers">—</strong><span>Connected peers</span></div>
+  <div class="stat">
+    <strong id="networkTip">Unknown</strong>
+    <span>Network Tip</span>
+  </div>
   <div class="stat"><strong id="collector">—</strong><span>Collector</span></div>
+
+  <div class="stat" style="min-width:300px;flex:0 1 360px;">
+    <div style="font-weight:600;margin-bottom:8px;">
+      Node status legend
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;
+                gap:9px 14px;font-size:12px;">
+
+      <div><span class="dot green"></span>
+        Synced (0–25 behind)</div>
+
+      <div><span class="dot yellow"></span>
+        Behind / Syncing / Ahead</div>
+
+      <div><span class="dot red"></span>
+        Forked / Offline</div>
+
+      <div><span class="dot gray"></span>
+        Unknown / Not observed</div>
+
+    </div>
+    <div style="font-size:10px;opacity:.75;margin-top:8px;">
+      Height proximity does not verify chain identity.
+    </div>
+  </div>
 </div>
 
 <section id="listView">
@@ -596,10 +758,10 @@ Read-only blockchain peer discovery and network monitoring
 <th><input type="checkbox" id="selectAll" title="Select visible nodes"></th>
 <th>Status</th>
 <th>Node</th>
-<th>Address</th>
+<th>Collector App Version</th>
 <th>Block height</th>
+<th>Behind Tip</th>
 <th>Geth version</th>
-<th>Enode</th>
 </tr>
 </thead>
 <tbody id="nodeRows"></tbody>
@@ -636,7 +798,7 @@ Click a node to inspect its details. Lines represent observed P2P connections.
 </section>
 
 <footer>
-<div class="version-footer">OutsideTheBox Multichain Node Explorer v0.2.2</div>
+<div class="version-footer">OutsideTheBox Multichain Node Explorer v3.0.0</div>
 <span id="updated">Waiting for collector...</span>
 <div style="margin-top:6px">
 Gray = synchronization not yet verified. Connection does not prove chain agreement.
@@ -818,15 +980,33 @@ function version(n) {
   return m ? m[0] : "Unknown";
 }
 
+function behindTip(n) {
+  const tip = data && data.network_tip
+    ? data.network_tip.height : null;
+
+  const height = n.block_height;
+
+  if(!Number.isSafeInteger(tip) ||
+     !Number.isSafeInteger(height) ||
+     tip < 0 || height < 0) return null;
+
+  return tip - height;
+}
+
 function status(n) {
-  if(n.sync_status === "synced") return ["green","Synced"];
-  if(n.sync_status === "syncing") return ["yellow","Syncing"];
   if(n.sync_status === "forked") return ["red","Forked"];
-  if(n.sync_status === "offline")
-    return ["red","Offline"];
+  if(n.sync_status === "offline") return ["red","Offline"];
   if(n.connected === false)
     return ["gray","Not recently observed"];
-  return ["gray","Unverified"];
+  if(n.sync_status === "syncing")
+    return ["yellow","Syncing"];
+
+  const behind = behindTip(n);
+
+  if(behind === null) return ["gray","Unknown"];
+  if(behind < 0) return ["yellow","Ahead"];
+  if(behind <= 25) return ["green","Synced"];
+  return ["yellow","Behind"];
 }
 
 function visibleNodes() {
@@ -857,25 +1037,33 @@ function renderList() {
     };
     checkCell.appendChild(check);
 
+    const delta = behindTip(n);
+    const deltaLabel = delta === null ? "—" :
+      delta < 0 ? "Ahead +" + Math.abs(delta) :
+      delta.toLocaleString();
+
     const values = [
-      st[1], name(n), address(n),
+      st[1],
+      name(n),
+      n.collector ? (n.collector_app_version || "—") : "—",
       n.block_height ?? "—",
-      version(n), (n.enode || "").slice(0,25) + "..."
+      deltaLabel,
+      version(n)
     ];
 
     values.forEach((value,i) => {
       const td = tr.insertCell();
       td.dataset.label = [
-        "Status", "Node", "Address",
-        "Block height", "Geth version", "Enode"
+        "Status", "Node", "Collector App Version", "Block height",
+        "Behind Tip", "Geth version"
       ][i];
       td.textContent = value;
+
       if(i===0) {
         const dot = document.createElement("span");
         dot.className = "dot " + st[0];
         td.prepend(dot);
       }
-      if(i===5) td.title = n.enode || "";
     });
     body.appendChild(tr);
   }
@@ -986,6 +1174,15 @@ function render() {
   if(!data) return;
   $("total").textContent=data.total_nodes;
   $("peers").textContent=data.connected_peers;
+
+  const tip = data.network_tip;
+  const validTip = tip &&
+    Number.isSafeInteger(tip.height) &&
+    tip.height >= 0;
+
+  $("networkTip").textContent = validTip
+    ? tip.height.toLocaleString("en-CA")
+    : "Unknown";
   $("collector").textContent=data.collector;
   $("updated").textContent="Last collection: "+data.timestamp;
   renderList();
